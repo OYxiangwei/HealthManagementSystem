@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oy.dao.UserSportHistoryMapper">
+    <resultMap id="UserSportHistoryResultMap" type="com.oy.entity.UserSportHistory">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="sportTime" column="sport_time"/>
+        <result property="collectDate" column="collect_date"/>
+        <association property="sport" column="sport_id"
+                     select="com.oy.dao.SportMapper.getByIdBreif">
+        </association>
+    </resultMap>
+
+    <select id="getAll" parameterType="Integer"
+            resultMap="UserSportHistoryResultMap">
+ 		select
+ 		id,
+ 		user_id,
+ 		sport_id,
+ 		sport_time,
+ 		collect_date
+ 		from user_sport_history where user_id = #{userId};
+ 	</select>
+
+    <resultMap type="com.oy.entity.EnergyDate" id="EnergyDateMap">
+        <result column="sum_consume_energy" property="energy"/>
+        <result column="collect_date" property="collectDate"/>
+    </resultMap>
+
+    <select id="getSumConsumeEnergy" parameterType="Integer" resultMap="EnergyDateMap">
+ 		select
+ 			sum(sport_time * consume_energy) as sum_consume_energy, collect_date
+ 		from
+ 			user_sport_history u
+ 		join
+ 			sport s
+ 		on
+ 			u.sport_id = s.id
+ 		where
+ 			user_id = #{userId}
+ 		group by
+ 			collect_date;
+ 	</select>
+
+    <insert id="insert" parameterType="com.oy.entity.UserSportHistory" useGeneratedKeys="true" keyProperty="id">
+ 		insert into
+ 			user_sport_history
+ 			(user_id, sport_id, sport_time, collect_date)
+ 		values
+ 			(#{userId}, #{sport.id}, #{sportTime}, #{collectDate});
+ 	</insert>
+
+</mapper>
